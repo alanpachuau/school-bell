@@ -50,7 +50,7 @@ class Kernel extends ConsoleKernel
                 if($bell->{$today}) {
                     $schedule->call( function () use ( $bell ) {
                         // Turn on the switches here.
-                        shell_exec('/usr/bin/python ' . base_path('scripts/gpio.py') . " {$bell->sw1} {$bell->sw2} {$bell->sw3} {$bell->sw4}");
+                        shell_exec('/usr/bin/python ' . base_path('scripts/gpio_on.py') . " {$bell->sw1} {$bell->sw2} {$bell->sw3} {$bell->sw4}");
                     } )->{$today.'s'}()->at( $bell->switch_on );
 
                     $schedule->call( function () use ( $bell ) {
