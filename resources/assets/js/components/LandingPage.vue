@@ -11,12 +11,12 @@
                             <el-collapse-item v-for="bell in bells" :gutter="20" :key="bell.id" :title="bell.name" :name="bell.id">
                                 <el-row type="flex" :gutter=10>
                                     <el-col :span="10">
-                                        <el-tag size="mini" type="info" v-if="bell.sound1">bell.sound1</el-tag>
-                                        <el-tag size="mini" type="warning" v-if="bell.sound1"><i class="el-icon-time"></i> {{bell.sound1_volume}}%</el-tag>
+                                        <el-tag size="mini" type="info" v-if="bell.sound1_id">bell.sound1_title</el-tag>
+                                        <el-tag size="mini" type="warning" v-if="bell.sound1_id"><i class="el-icon-time"></i> {{bell.sound1_volume}}%</el-tag>
                                     </el-col>
                                     <el-col :span="10">
-                                        <el-tag size="mini" type="info" v-if="bell.sound2">bell.sound2</el-tag>
-                                        <el-tag size="mini" type="warning" v-if="bell.sound2"><i class="el-icon-time"></i> {{bell.sound2_volume}}%</el-tag>
+                                        <el-tag size="mini" type="info" v-if="bell.sound2_id">bell.sound2_title</el-tag>
+                                        <el-tag size="mini" type="warning" v-if="bell.sound2_id"><i class="el-icon-time"></i> {{bell.sound2_volume}}%</el-tag>
                                     </el-col>
                                     <el-col :span="4" style="text-align:right;">
                                         <el-button type="danger" @click="removeBell(bell.id)" size="mini" round icon="el-icon-close"></el-button>
