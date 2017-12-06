@@ -14,7 +14,7 @@ class BellController extends Controller
         $bellTable = (new Bell)->getTable();
         $bells = Bell::leftJoin($soundTable .' as sound1_table', 'sound1_table.id', '=', $bellTable.'.sound1_id')
             ->leftJoin($soundTable. ' as sound2_table', 'sound2_table.id', '=', $bellTable.'.sound2_id')
-            ->orderBy("name", "asc")
+            ->orderBy("created_at", "asc")
             ->select(
                 $bellTable.'.*',
                 'sound2_table.title as sound2_title',
