@@ -16,10 +16,10 @@ class CreateBellsTable extends Migration
         Schema::create('bells', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name')->nullable();
-            $table->integer('sound1_id');
-            $table->integer('sound1_volume');
-            $table->integer('sound2_id');
-            $table->integer('sound2_volume');
+            $table->integer('sound1_id')->default(0);
+            $table->integer('sound1_volume')->default(90);
+            $table->integer('sound2_id')->default(0);
+            $table->integer('sound2_volume')->default(90);
             $table->boolean('monday')->default(false);
             $table->boolean('tuesday')->default(false);
             $table->boolean('wednesday')->default(false);
