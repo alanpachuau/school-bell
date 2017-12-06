@@ -65,7 +65,7 @@ class Kernel extends ConsoleKernel
                     } )->{$today.'s'}()->at( $bell->switch_on );
 
                     $schedule->call( function () use ( $bell ) {
-                        $mpg321 = '/usr/local/bin/mpg321';
+                        $mpg321 = '/usr/bin/mpg321';
                         $cmd = $mpg321 . ' -g ' . $bell->sound1_volume . ' ' . storage_path('app/' . $bell->sound1_file);
 
                         if($bell->sound2) {
