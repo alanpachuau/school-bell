@@ -2,8 +2,14 @@
 
 namespace App\Console;
 
+use App\Bell;
+use App\Sound;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Schema;
+use DateInterval;
+use DateTime;
+use DB;
 
 class Kernel extends ConsoleKernel
 {
@@ -24,8 +30,55 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        if (Schema::hasTable('bells')) {
+            $soundTable = (new Sound)->getTable();
+            $bellTable = (new Bell)->getTable();
+            $bells = Bell::leftJoin($soundTable .' as sound1_table', 'sound1_table.id', '=', $bellTable.'.sound1_id')
+                ->leftJoin($soundTable. ' as sound2_table', 'sound2_table.id', '=', $bellTable.'.sound2_id')
+                ->orderBy("name", "asc")
+                ->select(
+                    $bellTable.'.*',
+                    'sound2_table.title as sound2_title',
+                    'sound2_table.file as sound2_file',
+                    'sound1_table.title as sound1_title',
+                    'sound1_table.file as sound1_file'
+                )
+                ->get();
+
+            foreach ( $bells as $bell ) {
+                $today = strtolower(date('l'));
+                if($bell->{$today}) {
+                    $schedule->call( function () use ( $bell ) {
+                        // Turn on the switches here.
+                        if($bell->sw1) {
+                            shell_exec('/usr/bin/python ' . base_path('scripts/gpio.py') . ' 4 0');
+                        }
+                        if($bell->sw2) {
+                            shell_exec('/usr/bin/python ' . base_path('scripts/gpio.py') . ' 17 0');
+                        }
+                        if($bell->sw3) {
+                            shell_exec('/usr/bin/python ' . base_path('scripts/gpio.py') . ' 22 0');
+                        }
+                        if($bell->sw4) {
+                            shell_exec('/usr/bin/python ' . base_path('scripts/gpio.py') . ' 10 0');
+                        }
+                    } )->{$today.'s'}()->at( $bell->switch_on );
+
+                    $schedule->call( function () use ( $bell ) {
+                        $mpg321 = '/usr/local/bin/mpg321';
+                        $cmd = $mpg321 . ' -g ' . $bell->sound1_volume . ' ' . storage_path('app/' . $bell->sound1_file);
+
+                        if($bell->sound2) {
+                            $cmd .= ' && ' . $mpg321 . ' -g ' . $bell->sound2_volume . ' ' . storage_path('app/' . $bell->sound2_file);
+                        }
+
+                        $cmd .= ' && /usr/bin/python ' . base_path('scripts/gpio_off.py');
+
+                        shell_exec( $cmd );
+                    } )->{$today.'s'}()->at( $bell->time );
+                }
+            }
+        }
     }
 
     /**
