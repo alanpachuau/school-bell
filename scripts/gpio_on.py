@@ -17,8 +17,8 @@ GPIO.setup(22, GPIO.OUT)
 GPIO.setup(10, GPIO.OUT)
 
 GPIO.output(4, (state1 != 1))
-GPIO.output(17, (state1 != 1))
-GPIO.output(22, (state1 != 1))
-GPIO.output(10, (state1 != 1))
+GPIO.output(17, (state2 != 1))
+GPIO.output(22, (state3 != 1))
+GPIO.output(10, (state4 != 1))
 
 time.sleep(1)
