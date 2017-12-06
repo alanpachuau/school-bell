@@ -16076,8 +16076,8 @@ Vue.component('passport-authorized-clients', __webpack_require__(191));
 Vue.component('passport-personal-access-tokens', __webpack_require__(196));
 
 Vue.component('landing-page', __webpack_require__(201));
-Vue.component('bell-schedule', __webpack_require__(206));
-Vue.component('bell-sound', __webpack_require__(211));
+// Vue.component('bell-schedule', require('./components/BellSchedule.vue'));
+// Vue.component('bell-sound', require('./components/BellSound.vue'));
 
 var app = new Vue({
     el: '#app'
@@ -87122,7 +87122,7 @@ exports.push([module.i, "@import url(https://fonts.googleapis.com/css?family=Sou
 exports.push([module.i, "@import url(/css/material-icons.css);", ""]);
 
 // module
-exports.push([module.i, "\nbody { font-family: 'Source Sans Pro', sans-serif;\n}\n", ""]);
+exports.push([module.i, "\nbody {\n    font-family: 'Source Sans Pro', sans-serif;\n}\n.no-schedule {\n    text-align: center;\n    font-size: 18px;\n    color: #969696;\n    padding: 10px 0px 0 30px;\n}\n.no-schedule h3 {\n    margin-bottom: 10px;\n}\n.no-schedule p {\n    margin-bottom: 30px;\n}\n", ""]);
 
 // exports
 
@@ -87133,6 +87133,190 @@ exports.push([module.i, "\nbody { font-family: 'Source Sans Pro', sans-serif;\n}
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -87156,16 +87340,116 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     data: function data() {
         return {
             activeName: 'first',
-            tabPosition: 'left'
+            tabPosition: 'left',
+            uploadHeaders: {
+                'X-CSRF-TOKEN': window.Laravel.csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            bells: [],
+            createFormVisible: false,
+            sounds: [],
+            days: [{ id: 'sunday', name: 'Sunday' }, { id: 'monday', name: 'Monday' }, { id: 'tuesday', name: 'Tuesday' }, { id: 'wednesday', name: 'Wednesday' }, { id: 'thursday', name: 'Thursday' }, { id: 'friday', name: 'Friday' }, { id: 'saturday', name: 'Saturday' }],
+            createForm: {},
+            rules: {
+                name: [{ required: true, message: 'Please input name for this bell', trigger: 'blur' }],
+                days: [{ required: true, message: 'Please select day(s)', trigger: 'change' }],
+                time: [{ required: true, message: 'Please select time for the bell', trigger: 'change' }],
+                sound1: [{ required: true, message: 'Please choose bell sound', trigger: 'change' }]
+            }
         };
     },
 
+    created: function created() {
+        this.initFormData();
+        this.fetchBells();
+        this.fetchSounds();
+    },
     methods: {
-        handleClick: function handleClick(tab, event) {
+        handleTabClick: function handleTabClick(tab, event) {
             // eslint-disable-next-line no-console
             if (tab.name == 'third') {
                 $("#logout-form").submit();
             }
+        },
+        handleSuccess: function handleSuccess(response, file, fileList) {
+            this.fetchSounds();
+            this.$message('New sound added');
+        },
+        handleRemove: function handleRemove(file, fileList) {
+            var _this = this;
+
+            axios.delete('/sounds/' + file.id, {}).then(function (response) {
+                _this.$message('Sound removed');
+                _this.fetchSounds();
+            });
+        },
+        handlePreview: function handlePreview(file) {
+            console.log(file);
+        },
+        handleExceed: function handleExceed(files, fileList) {
+            this.$message.warning('The limit is 3, you selected ' + files.length + ' files this time, add up to ' + (files.length + fileList.length) + ' totally');
+        },
+        fetchSounds: function fetchSounds() {
+            var _this2 = this;
+
+            axios.get('/sounds', {}).then(function (response) {
+                _this2.sounds = response.data;
+            });
+        },
+        fetchBells: function fetchBells() {
+            var _this3 = this;
+
+            axios.get('/bells', {}).then(function (response) {
+                _this3.bells = response.data;
+            });
+        },
+        validate: function validate() {},
+        save: function save(formName) {
+            var _this4 = this;
+
+            this.$refs[formName].validate(function (valid) {
+                if (valid) {
+                    axios.post('/bells', _this4.createForm).then(function (response) {
+                        _this4.$message('New bell scheduled!');
+                        _this4.createFormVisible = false;
+                        _this4.$refs[formName].resetFields();
+                        _this4.initFormData();
+                        _this4.fetchBells();
+                    }).catch(function (error) {
+                        if (error && _typeof(error.response.data) === "object") {
+                            console.log(_.flatten(_.toArray(error.response.data)));
+                        } else {
+                            console.log(['Something went wrong. Please try again.']);
+                        }
+                    });
+                } else {
+                    return false;
+                }
+            });
+        },
+        initFormData: function initFormData() {
+            this.createForm = {
+                name: '',
+                sound1: '',
+                sound2: '',
+                days: [],
+                time: '',
+                sound1Volume: 90,
+                sound2Volume: 90,
+                switch1: false,
+                switch2: false,
+                switch3: false,
+                switch4: false,
+                switchOn: ''
+            };
+        },
+        removeBell: function removeBell(bellId) {
+            var _this5 = this;
+
+            axios.delete('/bells/' + bellId, {}).then(function (response) {
+                _this5.$message('Bell removed');
+                _this5.fetchBells();
+            });
         }
     }
 });
@@ -87183,7 +87467,7 @@ var render = function() {
     {
       staticStyle: { height: "80vh" },
       attrs: { "tab-position": _vm.tabPosition },
-      on: { "tab-click": _vm.handleClick },
+      on: { "tab-click": _vm.handleTabClick },
       model: {
         value: _vm.activeName,
         callback: function($$v) {
@@ -87193,33 +87477,868 @@ var render = function() {
       }
     },
     [
-      _c(
-        "el-tab-pane",
-        { attrs: { name: "first" } },
-        [
-          _c("span", { attrs: { slot: "label" }, slot: "label" }, [
-            _vm._v("Bell "),
-            _c("i", { staticClass: "el-icon-time" })
-          ]),
-          _vm._v(" "),
-          _c("bell-schedule")
-        ],
-        1
-      ),
+      _c("el-tab-pane", { attrs: { name: "first" } }, [
+        _c("span", { attrs: { slot: "label" }, slot: "label" }, [
+          _vm._v("Bell "),
+          _c("i", { staticClass: "el-icon-time" })
+        ]),
+        _vm._v(" "),
+        _c(
+          "div",
+          { staticStyle: { "margin-left": "50px" } },
+          [
+            _vm.bells.length
+              ? _c(
+                  "el-row",
+                  { attrs: { gutter: 20 } },
+                  [
+                    _c(
+                      "el-col",
+                      { attrs: { span: 20 } },
+                      [
+                        _c("h3", [_vm._v("Bells")]),
+                        _vm._v(" "),
+                        _c(
+                          "el-collapse",
+                          _vm._l(_vm.bells, function(bell) {
+                            return _c(
+                              "el-collapse-item",
+                              {
+                                key: bell.id,
+                                attrs: {
+                                  gutter: 20,
+                                  title: bell.name,
+                                  name: bell.id
+                                }
+                              },
+                              [
+                                _c(
+                                  "el-row",
+                                  { attrs: { type: "flex", gutter: 10 } },
+                                  [
+                                    _c(
+                                      "el-col",
+                                      { attrs: { span: 10 } },
+                                      [
+                                        bell.sound1
+                                          ? _c(
+                                              "el-tag",
+                                              {
+                                                attrs: {
+                                                  size: "mini",
+                                                  type: "info"
+                                                }
+                                              },
+                                              [_vm._v("bell.sound1")]
+                                            )
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        bell.sound1
+                                          ? _c(
+                                              "el-tag",
+                                              {
+                                                attrs: {
+                                                  size: "mini",
+                                                  type: "warning"
+                                                }
+                                              },
+                                              [
+                                                _c("i", {
+                                                  staticClass: "el-icon-time"
+                                                }),
+                                                _vm._v(
+                                                  " " +
+                                                    _vm._s(bell.sound1_volume) +
+                                                    "%"
+                                                )
+                                              ]
+                                            )
+                                          : _vm._e()
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "el-col",
+                                      { attrs: { span: 10 } },
+                                      [
+                                        bell.sound2
+                                          ? _c(
+                                              "el-tag",
+                                              {
+                                                attrs: {
+                                                  size: "mini",
+                                                  type: "info"
+                                                }
+                                              },
+                                              [_vm._v("bell.sound2")]
+                                            )
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        bell.sound2
+                                          ? _c(
+                                              "el-tag",
+                                              {
+                                                attrs: {
+                                                  size: "mini",
+                                                  type: "warning"
+                                                }
+                                              },
+                                              [
+                                                _c("i", {
+                                                  staticClass: "el-icon-time"
+                                                }),
+                                                _vm._v(
+                                                  " " +
+                                                    _vm._s(bell.sound2_volume) +
+                                                    "%"
+                                                )
+                                              ]
+                                            )
+                                          : _vm._e()
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "el-col",
+                                      {
+                                        staticStyle: { "text-align": "right" },
+                                        attrs: { span: 4 }
+                                      },
+                                      [
+                                        _c("el-button", {
+                                          attrs: {
+                                            type: "danger",
+                                            size: "mini",
+                                            round: "",
+                                            icon: "el-icon-close"
+                                          },
+                                          on: {
+                                            click: function($event) {
+                                              _vm.removeBell(bell.id)
+                                            }
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "el-row",
+                                  { attrs: { type: "flex", gutter: 10 } },
+                                  [
+                                    _c(
+                                      "el-col",
+                                      { attrs: { span: 14 } },
+                                      [
+                                        bell.sunday
+                                          ? _c(
+                                              "el-tag",
+                                              { attrs: { size: "mini" } },
+                                              [_vm._v("Sunday")]
+                                            )
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        bell.monday
+                                          ? _c(
+                                              "el-tag",
+                                              { attrs: { size: "mini" } },
+                                              [_vm._v("Monday")]
+                                            )
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        bell.tuesday
+                                          ? _c(
+                                              "el-tag",
+                                              { attrs: { size: "mini" } },
+                                              [_vm._v("Tuesday")]
+                                            )
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        bell.wednesday
+                                          ? _c(
+                                              "el-tag",
+                                              { attrs: { size: "mini" } },
+                                              [_vm._v("Wednesday")]
+                                            )
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        bell.thursday
+                                          ? _c(
+                                              "el-tag",
+                                              { attrs: { size: "mini" } },
+                                              [_vm._v("Thursday")]
+                                            )
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        bell.friday
+                                          ? _c(
+                                              "el-tag",
+                                              { attrs: { size: "mini" } },
+                                              [_vm._v("Friday")]
+                                            )
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        bell.saturday
+                                          ? _c(
+                                              "el-tag",
+                                              { attrs: { size: "mini" } },
+                                              [_vm._v("Saturday")]
+                                            )
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        _c(
+                                          "el-tag",
+                                          {
+                                            attrs: {
+                                              size: "mini",
+                                              type: "warning"
+                                            }
+                                          },
+                                          [
+                                            _c("i", {
+                                              staticClass: "el-icon-bell"
+                                            }),
+                                            _vm._v(" " + _vm._s(bell.time))
+                                          ]
+                                        )
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "el-col",
+                                      { attrs: { span: 10 } },
+                                      [
+                                        bell.sw1
+                                          ? _c(
+                                              "el-tag",
+                                              {
+                                                attrs: {
+                                                  size: "mini",
+                                                  type: "success"
+                                                }
+                                              },
+                                              [_vm._v("SW1")]
+                                            )
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        bell.sw2
+                                          ? _c(
+                                              "el-tag",
+                                              {
+                                                attrs: {
+                                                  size: "mini",
+                                                  type: "success"
+                                                }
+                                              },
+                                              [_vm._v("SW2")]
+                                            )
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        bell.sw3
+                                          ? _c(
+                                              "el-tag",
+                                              {
+                                                attrs: {
+                                                  size: "mini",
+                                                  type: "success"
+                                                }
+                                              },
+                                              [_vm._v("SW3")]
+                                            )
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        bell.sw4
+                                          ? _c(
+                                              "el-tag",
+                                              {
+                                                attrs: {
+                                                  size: "mini",
+                                                  type: "success"
+                                                }
+                                              },
+                                              [_vm._v("SW4")]
+                                            )
+                                          : _vm._e(),
+                                        _vm._v(" "),
+                                        _c(
+                                          "el-tag",
+                                          {
+                                            attrs: {
+                                              size: "mini",
+                                              type: "warning"
+                                            }
+                                          },
+                                          [
+                                            _c("i", {
+                                              staticClass: "el-icon-time"
+                                            }),
+                                            _vm._v(" " + _vm._s(bell.switch_on))
+                                          ]
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            )
+                          })
+                        )
+                      ],
+                      1
+                    ),
+                    _vm._v(" "),
+                    _c("el-col", { attrs: { span: 4 } }, [
+                      _c(
+                        "p",
+                        {
+                          staticStyle: {
+                            "text-align": "center",
+                            "margin-bottom": "30px"
+                          }
+                        },
+                        [
+                          _c(
+                            "el-button",
+                            {
+                              attrs: { size: "huge", round: "" },
+                              on: {
+                                click: function($event) {
+                                  _vm.createFormVisible = true
+                                }
+                              }
+                            },
+                            [
+                              _c("i", { staticClass: "el-icon-plus" }),
+                              _vm._v(
+                                "\n                            Add Bell\n                        "
+                              )
+                            ]
+                          )
+                        ],
+                        1
+                      )
+                    ])
+                  ],
+                  1
+                )
+              : _c("div", { staticClass: "no-schedule" }, [
+                  _c("h3", [
+                    _vm._v(
+                      "Okay! I believe this is the first time you've come here."
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("p", [
+                    _vm._v(
+                      "No bell schedule available at the moment! You can create new schedule now by clicking the button\n                    below."
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "p",
+                    [
+                      _c(
+                        "el-button",
+                        {
+                          attrs: { size: "huge", round: "" },
+                          on: {
+                            click: function($event) {
+                              _vm.createFormVisible = true
+                            }
+                          }
+                        },
+                        [
+                          _c("i", { staticClass: "el-icon-plus" }),
+                          _vm._v(
+                            "\n                        Create\n                        Schedule\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ]),
+            _vm._v(" "),
+            _c(
+              "el-dialog",
+              {
+                attrs: {
+                  title: "New Bell",
+                  width: "80%",
+                  visible: _vm.createFormVisible
+                },
+                on: {
+                  "update:visible": function($event) {
+                    _vm.createFormVisible = $event
+                  }
+                }
+              },
+              [
+                _c(
+                  "el-form",
+                  {
+                    ref: "newBell",
+                    attrs: {
+                      rules: _vm.rules,
+                      model: _vm.createForm,
+                      "label-width": "120px",
+                      "label-position": "left"
+                    }
+                  },
+                  [
+                    _c(
+                      "el-row",
+                      { attrs: { gutter: 60 } },
+                      [
+                        _c(
+                          "el-col",
+                          { attrs: { span: 12 } },
+                          [
+                            _c(
+                              "el-form-item",
+                              { attrs: { prop: "name", label: "Name" } },
+                              [
+                                _c("el-input", {
+                                  attrs: {
+                                    placeholder:
+                                      "Enter name to identify this bell",
+                                    "auto-complete": "off"
+                                  },
+                                  model: {
+                                    value: _vm.createForm.name,
+                                    callback: function($$v) {
+                                      _vm.$set(_vm.createForm, "name", $$v)
+                                    },
+                                    expression: "createForm.name"
+                                  }
+                                })
+                              ],
+                              1
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "el-form-item",
+                              { attrs: { prop: "days", label: "Day" } },
+                              [
+                                _c(
+                                  "el-select",
+                                  {
+                                    staticStyle: { width: "100%" },
+                                    attrs: {
+                                      clearable: "",
+                                      multiple: "",
+                                      placeholder: "Choose day"
+                                    },
+                                    model: {
+                                      value: _vm.createForm.days,
+                                      callback: function($$v) {
+                                        _vm.$set(_vm.createForm, "days", $$v)
+                                      },
+                                      expression: "createForm.days"
+                                    }
+                                  },
+                                  _vm._l(_vm.days, function(item) {
+                                    return _c("el-option", {
+                                      key: item.id,
+                                      attrs: {
+                                        label: item.name,
+                                        value: item.id
+                                      }
+                                    })
+                                  })
+                                )
+                              ],
+                              1
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "el-form-item",
+                              { attrs: { prop: "time", label: "Time" } },
+                              [
+                                _c("el-time-picker", {
+                                  staticStyle: { width: "100%" },
+                                  attrs: {
+                                    format: "HH:mm",
+                                    "value-format": "HH:mm",
+                                    type: "fixed-time",
+                                    placeholder: "Pick a time"
+                                  },
+                                  model: {
+                                    value: _vm.createForm.time,
+                                    callback: function($$v) {
+                                      _vm.$set(_vm.createForm, "time", $$v)
+                                    },
+                                    expression: "createForm.time"
+                                  }
+                                })
+                              ],
+                              1
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "el-form-item",
+                              { attrs: { prop: "sound1", label: "Sound One" } },
+                              [
+                                _c(
+                                  "el-select",
+                                  {
+                                    staticStyle: { width: "100%" },
+                                    attrs: {
+                                      clearable: "",
+                                      placeholder: "Choose sound one"
+                                    },
+                                    model: {
+                                      value: _vm.createForm.sound1,
+                                      callback: function($$v) {
+                                        _vm.$set(_vm.createForm, "sound1", $$v)
+                                      },
+                                      expression: "createForm.sound1"
+                                    }
+                                  },
+                                  _vm._l(_vm.sounds, function(item) {
+                                    return _c("el-option", {
+                                      key: item.id,
+                                      attrs: {
+                                        label: item.name,
+                                        value: item.id
+                                      }
+                                    })
+                                  })
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "div",
+                                  { staticClass: "block" },
+                                  [
+                                    _c(
+                                      "span",
+                                      { staticClass: "demonstration" },
+                                      [_vm._v("Sound Volume")]
+                                    ),
+                                    _vm._v(" "),
+                                    _c("el-slider", {
+                                      staticStyle: {
+                                        float: "right",
+                                        width: "70%",
+                                        "line-height": "34px"
+                                      },
+                                      model: {
+                                        value: _vm.createForm.sound1Volume,
+                                        callback: function($$v) {
+                                          _vm.$set(
+                                            _vm.createForm,
+                                            "sound1Volume",
+                                            $$v
+                                          )
+                                        },
+                                        expression: "createForm.sound1Volume"
+                                      }
+                                    })
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "el-form-item",
+                              { attrs: { prop: "sound2", label: "Sound Two" } },
+                              [
+                                _c(
+                                  "el-select",
+                                  {
+                                    staticStyle: { width: "100%" },
+                                    attrs: {
+                                      clearable: "",
+                                      placeholder: "Choose sound two"
+                                    },
+                                    model: {
+                                      value: _vm.createForm.sound2,
+                                      callback: function($$v) {
+                                        _vm.$set(_vm.createForm, "sound2", $$v)
+                                      },
+                                      expression: "createForm.sound2"
+                                    }
+                                  },
+                                  _vm._l(_vm.sounds, function(item) {
+                                    return _c("el-option", {
+                                      key: item.id,
+                                      attrs: {
+                                        label: item.name,
+                                        value: item.id
+                                      }
+                                    })
+                                  })
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "div",
+                                  { staticClass: "block" },
+                                  [
+                                    _c(
+                                      "span",
+                                      { staticClass: "demonstration" },
+                                      [_vm._v("Sound Volume")]
+                                    ),
+                                    _vm._v(" "),
+                                    _c("el-slider", {
+                                      staticStyle: {
+                                        float: "right",
+                                        width: "70%",
+                                        "line-height": "34px"
+                                      },
+                                      model: {
+                                        value: _vm.createForm.sound2Volume,
+                                        callback: function($$v) {
+                                          _vm.$set(
+                                            _vm.createForm,
+                                            "sound2Volume",
+                                            $$v
+                                          )
+                                        },
+                                        expression: "createForm.sound2Volume"
+                                      }
+                                    })
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            )
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "el-col",
+                          { attrs: { span: 12 } },
+                          [
+                            _c(
+                              "el-form-item",
+                              {
+                                attrs: { prop: "switches", label: "Switches" }
+                              },
+                              [
+                                _c("el-switch", {
+                                  staticStyle: { "margin-right": "10px" },
+                                  attrs: { "active-text": "SW1" },
+                                  model: {
+                                    value: _vm.createForm.switch1,
+                                    callback: function($$v) {
+                                      _vm.$set(_vm.createForm, "switch1", $$v)
+                                    },
+                                    expression: "createForm.switch1"
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("el-switch", {
+                                  staticStyle: { "margin-right": "10px" },
+                                  attrs: { "active-text": "SW2" },
+                                  model: {
+                                    value: _vm.createForm.switch2,
+                                    callback: function($$v) {
+                                      _vm.$set(_vm.createForm, "switch2", $$v)
+                                    },
+                                    expression: "createForm.switch2"
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("el-switch", {
+                                  staticStyle: { "margin-right": "10px" },
+                                  attrs: { "active-text": "SW3" },
+                                  model: {
+                                    value: _vm.createForm.switch3,
+                                    callback: function($$v) {
+                                      _vm.$set(_vm.createForm, "switch3", $$v)
+                                    },
+                                    expression: "createForm.switch3"
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("el-switch", {
+                                  staticStyle: { "margin-right": "10px" },
+                                  attrs: { "active-text": "SW4" },
+                                  model: {
+                                    value: _vm.createForm.switch4,
+                                    callback: function($$v) {
+                                      _vm.$set(_vm.createForm, "switch4", $$v)
+                                    },
+                                    expression: "createForm.switch4"
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "sub-title" }, [
+                                  _vm._v(
+                                    "Only active switches will be controlled"
+                                  )
+                                ])
+                              ],
+                              1
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "el-form-item",
+                              {
+                                attrs: {
+                                  prop: "switchOn",
+                                  label: "Switch On At"
+                                }
+                              },
+                              [
+                                _c("el-time-picker", {
+                                  staticStyle: { width: "100%" },
+                                  attrs: {
+                                    format: "HH:mm",
+                                    "value-format": "HH:mm",
+                                    type: "fixed-time",
+                                    placeholder: "Pick a time"
+                                  },
+                                  model: {
+                                    value: _vm.createForm.switchOn,
+                                    callback: function($$v) {
+                                      _vm.$set(_vm.createForm, "switchOn", $$v)
+                                    },
+                                    expression: "createForm.switchOn"
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "sub-title" }, [
+                                  _vm._v(
+                                    "Switches will be turned off automatically"
+                                  )
+                                ])
+                              ],
+                              1
+                            )
+                          ],
+                          1
+                        )
+                      ],
+                      1
+                    )
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c(
+                  "span",
+                  {
+                    staticClass: "dialog-footer",
+                    attrs: { slot: "footer" },
+                    slot: "footer"
+                  },
+                  [
+                    _c(
+                      "el-button",
+                      {
+                        attrs: { round: "" },
+                        on: {
+                          click: function($event) {
+                            _vm.createFormVisible = false
+                          }
+                        }
+                      },
+                      [_vm._v("Close")]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "el-button",
+                      {
+                        attrs: { round: "" },
+                        on: {
+                          click: function($event) {
+                            _vm.save("newBell")
+                          }
+                        }
+                      },
+                      [_vm._v("Save")]
+                    )
+                  ],
+                  1
+                )
+              ],
+              1
+            )
+          ],
+          1
+        )
+      ]),
       _vm._v(" "),
-      _c(
-        "el-tab-pane",
-        { attrs: { name: "second" } },
-        [
-          _c("span", { attrs: { slot: "label" }, slot: "label" }, [
-            _vm._v("Sound "),
-            _c("i", { staticClass: "el-icon-service" })
-          ]),
-          _vm._v(" "),
-          _c("bell-sound")
-        ],
-        1
-      ),
+      _c("el-tab-pane", { attrs: { name: "second" } }, [
+        _c("span", { attrs: { slot: "label" }, slot: "label" }, [
+          _vm._v("Sound "),
+          _c("i", { staticClass: "el-icon-service" })
+        ]),
+        _vm._v(" "),
+        _c(
+          "div",
+          { staticStyle: { "margin-left": "50px" } },
+          [
+            _c(
+              "el-row",
+              { attrs: { gutter: 20 } },
+              [
+                _c(
+                  "el-col",
+                  { attrs: { span: 12 } },
+                  [
+                    _c("h3", [_vm._v("Sounds")]),
+                    _vm._v(" "),
+                    _c(
+                      "el-upload",
+                      {
+                        ref: "upload",
+                        staticClass: "upload-demo",
+                        attrs: {
+                          "with-credentials": true,
+                          "on-success": _vm.handleSuccess,
+                          "on-remove": _vm.handleRemove,
+                          headers: _vm.uploadHeaders,
+                          "show-file-list": true,
+                          "file-list": _vm.sounds,
+                          accept: ".mp3",
+                          action: "/sounds/upload"
+                        }
+                      },
+                      [
+                        _c(
+                          "el-button",
+                          {
+                            attrs: {
+                              slot: "trigger",
+                              size: "large",
+                              round: ""
+                            },
+                            slot: "trigger"
+                          },
+                          [
+                            _c("i", { staticClass: "el-icon-upload2" }),
+                            _vm._v(" Add Sound")
+                          ]
+                        )
+                      ],
+                      1
+                    )
+                  ],
+                  1
+                )
+              ],
+              1
+            )
+          ],
+          1
+        )
+      ]),
       _vm._v(" "),
       _c("el-tab-pane", { attrs: { name: "third" } }, [
         _c("span", { attrs: { slot: "label" }, slot: "label" }, [
@@ -87247,1043 +88366,16 @@ if (false) {
 }
 
 /***/ }),
-/* 206 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var disposed = false
-function injectStyle (ssrContext) {
-  if (disposed) return
-  __webpack_require__(207)
-}
-var normalizeComponent = __webpack_require__(16)
-/* script */
-var __vue_script__ = __webpack_require__(209)
-/* template */
-var __vue_template__ = __webpack_require__(210)
-/* template functional */
-var __vue_template_functional__ = false
-/* styles */
-var __vue_styles__ = injectStyle
-/* scopeId */
-var __vue_scopeId__ = null
-/* moduleIdentifier (server only) */
-var __vue_module_identifier__ = null
-var Component = normalizeComponent(
-  __vue_script__,
-  __vue_template__,
-  __vue_template_functional__,
-  __vue_styles__,
-  __vue_scopeId__,
-  __vue_module_identifier__
-)
-Component.options.__file = "resources/assets/js/components/BellSchedule.vue"
-if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
-
-/* hot reload */
-if (false) {(function () {
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), false)
-  if (!hotAPI.compatible) return
-  module.hot.accept()
-  if (!module.hot.data) {
-    hotAPI.createRecord("data-v-0b427d71", Component.options)
-  } else {
-    hotAPI.reload("data-v-0b427d71", Component.options)
-' + '  }
-  module.hot.dispose(function (data) {
-    disposed = true
-  })
-})()}
-
-module.exports = Component.exports
-
-
-/***/ }),
-/* 207 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// style-loader: Adds some css to the DOM by adding a <style> tag
-
-// load the styles
-var content = __webpack_require__(208);
-if(typeof content === 'string') content = [[module.i, content, '']];
-if(content.locals) module.exports = content.locals;
-// add the styles to the DOM
-var update = __webpack_require__(15)("fb1a0152", content, false);
-// Hot Module Replacement
-if(false) {
- // When the styles change, update the <style> tags
- if(!content.locals) {
-   module.hot.accept("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-0b427d71\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./BellSchedule.vue", function() {
-     var newContent = require("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-0b427d71\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./BellSchedule.vue");
-     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-     update(newContent);
-   });
- }
- // When the module is disposed, remove the <style> tags
- module.hot.dispose(function() { update(); });
-}
-
-/***/ }),
-/* 208 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(6)(undefined);
-// imports
-
-
-// module
-exports.push([module.i, "\n.no-schedule {\n    text-align: center;\n    font-size: 18px;\n    color: #969696;\n    padding: 10px 0px 0 30px;\n}\n.no-schedule h3 {\n    margin-bottom: 10px;\n}\n.no-schedule p {\n    margin-bottom: 30px;\n}\n", ""]);
-
-// exports
-
-
-/***/ }),
-/* 209 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ __webpack_exports__["default"] = ({
-  name: 'bell-schedule',
-  data: function data() {
-    return {
-      activeNames: ['1'],
-      schedules: [],
-      createFormVisible: false,
-      bellInfo: '',
-      sounds: [{ id: 'frog', name: 'Frog' }, { id: 'ding', name: 'Ding Ding' }],
-      days: [{ id: 'daily', name: 'Daily' }, { id: 'sundays', name: 'Every Sunday' }, { id: 'mondays', name: 'Every Monday' }, { id: 'tuesdays', name: 'Every Tuesday' }, { id: 'wednesdays', name: 'Every Wednesday' }, { id: 'thursdays', name: 'Every Thursday' }, { id: 'fridays', name: 'Every Friday' }, { id: 'saturdays', name: 'Every Saturday' }],
-      createForm: {
-        name: '',
-        sound1: '',
-        sound2: '',
-        day: '',
-        time: '',
-        sound1Volume: 30,
-        sound2Volume: 20,
-        switch1: false,
-        switch2: true,
-        switch3: false,
-        switch4: true,
-        switchBefore: 1,
-        switchAfter: 1
-      }
-    };
-  },
-
-  watch: {
-    'createForm.day': {
-      handler: function handler(day) {
-        if (this.createForm.time.length) {
-          this.bellInfo = 'The alarm will run <b>' + day.name + '</b> at <b>' + this.createForm.time + '</b>';
-        }
-      },
-
-      deep: true
-    },
-    'createForm.time': {
-      handler: function handler(time) {
-        if (this.createForm.day.length) {
-          this.bellInfo = 'The alarm will run <b>' + this.createForm.day.name + '</b> at <b>' + time + '</b>';
-        }
-      },
-
-      deep: true
-    }
-  },
-  methods: {}
-});
-
-/***/ }),
-/* 210 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    [
-      _vm.schedules.length
-        ? _c(
-            "el-row",
-            { attrs: { gutter: 20 } },
-            [
-              _c(
-                "el-col",
-                { attrs: { span: 20 } },
-                [
-                  _c(
-                    "el-collapse",
-                    {
-                      model: {
-                        value: _vm.activeNames,
-                        callback: function($$v) {
-                          _vm.activeNames = $$v
-                        },
-                        expression: "activeNames"
-                      }
-                    },
-                    [
-                      _c(
-                        "el-collapse-item",
-                        { attrs: { title: "Consistency", name: "1" } },
-                        [
-                          _c("div", [
-                            _vm._v(
-                              "A with real life: in line with the process and logic of real life, and comply with\n                        languages and habits that the users are used to;\n                    "
-                            )
-                          ]),
-                          _vm._v(" "),
-                          _c("div", [
-                            _vm._v(
-                              "Consistent within interface: all elements should be consistent, such as: design style,\n                        icons and texts, position of elements, etc.\n                    "
-                            )
-                          ])
-                        ]
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "el-collapse-item",
-                        { attrs: { title: "Feedback", name: "2" } },
-                        [
-                          _c("div", [
-                            _vm._v(
-                              "Operation feedback: enable the users to clearly perceive their operations by style updates\n                        and interactive effects;\n                    "
-                            )
-                          ]),
-                          _vm._v(" "),
-                          _c("div", [
-                            _vm._v(
-                              "Visual feedback: reflect current state by updating or rearranging elements of the page.\n                    "
-                            )
-                          ])
-                        ]
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "el-collapse-item",
-                        { attrs: { title: "Efficiency", name: "3" } },
-                        [
-                          _c("div", [
-                            _vm._v(
-                              "Simplify the process: keep operating process simple and intuitive;"
-                            )
-                          ]),
-                          _vm._v(" "),
-                          _c("div", [
-                            _vm._v(
-                              "Definite and clear: enunciate your intentions clearly so that the users can quickly\n                        understand and make decisions;\n                    "
-                            )
-                          ]),
-                          _vm._v(" "),
-                          _c("div", [
-                            _vm._v(
-                              "Easy to identify: the interface should be straightforward, which helps the users to\n                        identify and frees them from memorizing and recalling.\n                    "
-                            )
-                          ])
-                        ]
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "el-collapse-item",
-                        { attrs: { title: "Controllability", name: "4" } },
-                        [
-                          _c("div", [
-                            _vm._v(
-                              "Decision making: giving advices about operations is acceptable, but do not make decisions\n                        for the users;\n                    "
-                            )
-                          ]),
-                          _vm._v(" "),
-                          _c("div", [
-                            _vm._v(
-                              "Controlled consequences: users should be granted the freedom to operate, including\n                        canceling, aborting or terminating current operation.\n                    "
-                            )
-                          ])
-                        ]
-                      )
-                    ],
-                    1
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c("el-col", { attrs: { span: 4 } }, [
-                _c(
-                  "p",
-                  {
-                    staticStyle: {
-                      "text-align": "center",
-                      "margin-bottom": "30px"
-                    }
-                  },
-                  [
-                    _c("el-button", { attrs: { size: "huge", round: "" } }, [
-                      _c("i", { staticClass: "el-icon-plus" }),
-                      _vm._v(" Add New")
-                    ])
-                  ],
-                  1
-                )
-              ])
-            ],
-            1
-          )
-        : _c("div", { staticClass: "no-schedule" }, [
-            _c("h3", [
-              _vm._v("Okay! I believe this is the first time you've come here.")
-            ]),
-            _vm._v(" "),
-            _c("p", [
-              _vm._v(
-                "No bell schedule available at the moment! You can create new schedule now by clicking the button\n            below."
-              )
-            ]),
-            _vm._v(" "),
-            _c(
-              "p",
-              [
-                _c(
-                  "el-button",
-                  {
-                    attrs: { size: "huge", round: "" },
-                    on: {
-                      click: function($event) {
-                        _vm.createFormVisible = true
-                      }
-                    }
-                  },
-                  [
-                    _c("i", { staticClass: "el-icon-plus" }),
-                    _vm._v(" Create\n                Schedule\n            ")
-                  ]
-                )
-              ],
-              1
-            )
-          ]),
-      _vm._v(" "),
-      _c(
-        "el-dialog",
-        {
-          attrs: {
-            title: "New Bell",
-            width: "40%",
-            visible: _vm.createFormVisible
-          },
-          on: {
-            "update:visible": function($event) {
-              _vm.createFormVisible = $event
-            }
-          }
-        },
-        [
-          _c(
-            "el-form",
-            {
-              ref: "editForm",
-              attrs: {
-                model: _vm.createForm,
-                "label-width": "120px",
-                "label-position": "left"
-              }
-            },
-            [
-              _c(
-                "el-form-item",
-                { attrs: { prop: "name", label: "Name" } },
-                [
-                  _c("el-input", {
-                    attrs: {
-                      placeholder: "Enter name to identify this bell",
-                      "auto-complete": "off"
-                    },
-                    model: {
-                      value: _vm.createForm.name,
-                      callback: function($$v) {
-                        _vm.$set(_vm.createForm, "name", $$v)
-                      },
-                      expression: "createForm.name"
-                    }
-                  })
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c(
-                "el-form-item",
-                { attrs: { prop: "sound1", label: "Day" } },
-                [
-                  _c(
-                    "el-select",
-                    {
-                      staticStyle: { width: "100%" },
-                      attrs: { clearable: "", placeholder: "Choose day" },
-                      model: {
-                        value: _vm.createForm.day,
-                        callback: function($$v) {
-                          _vm.$set(_vm.createForm, "day", $$v)
-                        },
-                        expression: "createForm.day"
-                      }
-                    },
-                    _vm._l(_vm.days, function(item) {
-                      return _c("el-option", {
-                        key: item.id,
-                        attrs: { label: item.name, value: item }
-                      })
-                    })
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c(
-                "el-form-item",
-                { attrs: { prop: "time", label: "Time" } },
-                [
-                  _c("el-time-picker", {
-                    staticStyle: { width: "100%" },
-                    attrs: { type: "fixed-time", placeholder: "Pick a time" },
-                    model: {
-                      value: _vm.createForm.time,
-                      callback: function($$v) {
-                        _vm.$set(_vm.createForm, "time", $$v)
-                      },
-                      expression: "createForm.time"
-                    }
-                  })
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _vm.bellInfo
-                ? _c("p", { domProps: { innerHTML: _vm._s(_vm.bellInfo) } })
-                : _vm._e(),
-              _vm._v(" "),
-              _c(
-                "el-form-item",
-                { attrs: { prop: "sound1", label: "Sound One" } },
-                [
-                  _c(
-                    "el-select",
-                    {
-                      staticStyle: { width: "100%" },
-                      attrs: { clearable: "", placeholder: "Choose sound one" },
-                      model: {
-                        value: _vm.createForm.sound1,
-                        callback: function($$v) {
-                          _vm.$set(_vm.createForm, "sound1", $$v)
-                        },
-                        expression: "createForm.sound1"
-                      }
-                    },
-                    _vm._l(_vm.sounds, function(item) {
-                      return _c("el-option", {
-                        key: item.id,
-                        attrs: { label: item.name, value: item.id }
-                      })
-                    })
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c(
-                "el-form-item",
-                { attrs: { prop: "sound2", label: "Sound Two" } },
-                [
-                  _c(
-                    "el-select",
-                    {
-                      staticStyle: { width: "100%" },
-                      attrs: { clearable: "", placeholder: "Choose sound two" },
-                      model: {
-                        value: _vm.createForm.sound1,
-                        callback: function($$v) {
-                          _vm.$set(_vm.createForm, "sound1", $$v)
-                        },
-                        expression: "createForm.sound1"
-                      }
-                    },
-                    _vm._l(_vm.sounds, function(item) {
-                      return _c("el-option", {
-                        key: item.id,
-                        attrs: { label: item.name, value: item.id }
-                      })
-                    })
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    { staticClass: "block" },
-                    [
-                      _c("span", { staticClass: "demonstration" }, [
-                        _vm._v("Sound Volume")
-                      ]),
-                      _vm._v(" "),
-                      _c("el-slider", {
-                        staticStyle: {
-                          float: "right",
-                          width: "70%",
-                          "line-height": "34px"
-                        },
-                        model: {
-                          value: _vm.createForm.sound2Volume,
-                          callback: function($$v) {
-                            _vm.$set(_vm.createForm, "sound2Volume", $$v)
-                          },
-                          expression: "createForm.sound2Volume"
-                        }
-                      })
-                    ],
-                    1
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c(
-                "el-form-item",
-                { attrs: { label: "Switches" } },
-                [
-                  _c("el-switch", {
-                    staticStyle: { "margin-right": "10px" },
-                    attrs: { "active-text": "SW1" },
-                    model: {
-                      value: _vm.createForm.switch1,
-                      callback: function($$v) {
-                        _vm.$set(_vm.createForm, "switch1", $$v)
-                      },
-                      expression: "createForm.switch1"
-                    }
-                  }),
-                  _vm._v(" "),
-                  _c("el-switch", {
-                    staticStyle: { "margin-right": "10px" },
-                    attrs: { "active-text": "SW2" },
-                    model: {
-                      value: _vm.createForm.switch2,
-                      callback: function($$v) {
-                        _vm.$set(_vm.createForm, "switch2", $$v)
-                      },
-                      expression: "createForm.switch2"
-                    }
-                  }),
-                  _vm._v(" "),
-                  _c("el-switch", {
-                    staticStyle: { "margin-right": "10px" },
-                    attrs: { "active-text": "SW3" },
-                    model: {
-                      value: _vm.createForm.switch3,
-                      callback: function($$v) {
-                        _vm.$set(_vm.createForm, "switch3", $$v)
-                      },
-                      expression: "createForm.switch3"
-                    }
-                  }),
-                  _vm._v(" "),
-                  _c("el-switch", {
-                    staticStyle: { "margin-right": "10px" },
-                    attrs: { "active-text": "SW4" },
-                    model: {
-                      value: _vm.createForm.switch4,
-                      callback: function($$v) {
-                        _vm.$set(_vm.createForm, "switch4", $$v)
-                      },
-                      expression: "createForm.switch4"
-                    }
-                  })
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c(
-                "el-form-item",
-                {
-                  staticStyle: { width: "250px" },
-                  attrs: { label: "Switch On Before" }
-                },
-                [
-                  _c(
-                    "el-input",
-                    {
-                      model: {
-                        value: _vm.createForm.switchBefore,
-                        callback: function($$v) {
-                          _vm.$set(_vm.createForm, "switchBefore", $$v)
-                        },
-                        expression: "createForm.switchBefore"
-                      }
-                    },
-                    [_c("template", { slot: "append" }, [_vm._v("mins")])],
-                    2
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c(
-                "el-form-item",
-                {
-                  staticStyle: { width: "250px" },
-                  attrs: { label: "Switch Off After" }
-                },
-                [
-                  _c(
-                    "el-input",
-                    {
-                      model: {
-                        value: _vm.createForm.switchAfter,
-                        callback: function($$v) {
-                          _vm.$set(_vm.createForm, "switchAfter", $$v)
-                        },
-                        expression: "createForm.switchAfter"
-                      }
-                    },
-                    [_c("template", { slot: "append" }, [_vm._v("mins")])],
-                    2
-                  )
-                ],
-                1
-              )
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "span",
-            {
-              staticClass: "dialog-footer",
-              attrs: { slot: "footer" },
-              slot: "footer"
-            },
-            [
-              _c(
-                "el-button",
-                {
-                  attrs: { round: "" },
-                  on: {
-                    click: function($event) {
-                      _vm.createFormVisible = false
-                    }
-                  }
-                },
-                [_vm._v("Close")]
-              ),
-              _vm._v(" "),
-              _c("el-button", { attrs: { round: "" } }, [_vm._v("Save")])
-            ],
-            1
-          )
-        ],
-        1
-      )
-    ],
-    1
-  )
-}
-var staticRenderFns = []
-render._withStripped = true
-module.exports = { render: render, staticRenderFns: staticRenderFns }
-if (false) {
-  module.hot.accept()
-  if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-0b427d71", module.exports)
-  }
-}
-
-/***/ }),
-/* 211 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var disposed = false
-function injectStyle (ssrContext) {
-  if (disposed) return
-  __webpack_require__(212)
-}
-var normalizeComponent = __webpack_require__(16)
-/* script */
-var __vue_script__ = __webpack_require__(214)
-/* template */
-var __vue_template__ = __webpack_require__(215)
-/* template functional */
-var __vue_template_functional__ = false
-/* styles */
-var __vue_styles__ = injectStyle
-/* scopeId */
-var __vue_scopeId__ = null
-/* moduleIdentifier (server only) */
-var __vue_module_identifier__ = null
-var Component = normalizeComponent(
-  __vue_script__,
-  __vue_template__,
-  __vue_template_functional__,
-  __vue_styles__,
-  __vue_scopeId__,
-  __vue_module_identifier__
-)
-Component.options.__file = "resources/assets/js/components/BellSound.vue"
-if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
-
-/* hot reload */
-if (false) {(function () {
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), false)
-  if (!hotAPI.compatible) return
-  module.hot.accept()
-  if (!module.hot.data) {
-    hotAPI.createRecord("data-v-e99d30b6", Component.options)
-  } else {
-    hotAPI.reload("data-v-e99d30b6", Component.options)
-' + '  }
-  module.hot.dispose(function (data) {
-    disposed = true
-  })
-})()}
-
-module.exports = Component.exports
-
-
-/***/ }),
-/* 212 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// style-loader: Adds some css to the DOM by adding a <style> tag
-
-// load the styles
-var content = __webpack_require__(213);
-if(typeof content === 'string') content = [[module.i, content, '']];
-if(content.locals) module.exports = content.locals;
-// add the styles to the DOM
-var update = __webpack_require__(15)("69a7e9f0", content, false);
-// Hot Module Replacement
-if(false) {
- // When the styles change, update the <style> tags
- if(!content.locals) {
-   module.hot.accept("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-e99d30b6\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./BellSound.vue", function() {
-     var newContent = require("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-e99d30b6\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./BellSound.vue");
-     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-     update(newContent);
-   });
- }
- // When the module is disposed, remove the <style> tags
- module.hot.dispose(function() { update(); });
-}
-
-/***/ }),
-/* 213 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(6)(undefined);
-// imports
-
-
-// module
-exports.push([module.i, "\n.no-sound {\n    text-align: center;\n    font-size: 18px;\n    color: #969696;\n    padding: 10px 0px 0 30px;\n}\n.no-sound h3 {\n    margin-bottom: 10px;\n}\n.no-sound p {\n    margin-bottom: 30px;\n}\n", ""]);
-
-// exports
-
-
-/***/ }),
-/* 214 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ __webpack_exports__["default"] = ({
-    name: 'bell-sound',
-    data: function data() {
-        return {
-            activeNames: ['1'],
-            sounds: [],
-            createFormVisible: false,
-            createForm: {
-                name: '',
-                sound: ''
-            },
-            uploadHeaders: {
-                'X-CSRF-TOKEN': window.Laravel.csrfToken,
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            fileList: [{
-                id: 1,
-                name: 'food.jpeg',
-                url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-            }, {
-                id: 2,
-                name: 'food2.jpeg',
-                url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-            }]
-        };
-    },
-
-    created: function created() {
-        this.fetchSounds();
-    },
-    methods: {
-        fetchSounds: function fetchSounds() {
-            var _this = this;
-
-            var self = this;
-            axios.get('/sounds', {}).then(function (response) {
-                _this.fileList = response.data;
-            });
-        },
-        handleSuccess: function handleSuccess(response, file, fileList) {
-            this.fetchSounds();
-        },
-        handleRemove: function handleRemove(file, fileList) {
-            axios.delete('/sounds/' + file.id, {}).then(function (response) {});
-        },
-        handlePreview: function handlePreview(file) {
-            console.log(file);
-        },
-        handleExceed: function handleExceed(files, fileList) {
-            this.$message.warning('The limit is 3, you selected ' + files.length + ' files this time, add up to ' + (files.length + fileList.length) + ' totally');
-        }
-    }
-});
-
-/***/ }),
-/* 215 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    [
-      _c(
-        "el-row",
-        { attrs: { gutter: 100 } },
-        [
-          _c(
-            "el-col",
-            { attrs: { span: 12 } },
-            [
-              _c("h3", [_vm._v("Sounds")]),
-              _vm._v(" "),
-              _c(
-                "el-upload",
-                {
-                  ref: "upload",
-                  staticClass: "upload-demo",
-                  attrs: {
-                    "with-credentials": true,
-                    "on-success": _vm.handleSuccess,
-                    "on-remove": _vm.handleRemove,
-                    headers: _vm.uploadHeaders,
-                    "show-file-list": true,
-                    "file-list": _vm.fileList,
-                    accept: ".mp3",
-                    action: "/sounds/upload"
-                  }
-                },
-                [
-                  _c(
-                    "el-button",
-                    {
-                      attrs: { slot: "trigger", size: "large", round: "" },
-                      slot: "trigger"
-                    },
-                    [
-                      _c("i", { staticClass: "el-icon-upload2" }),
-                      _vm._v(" Add Sound")
-                    ]
-                  )
-                ],
-                1
-              )
-            ],
-            1
-          )
-        ],
-        1
-      )
-    ],
-    1
-  )
-}
-var staticRenderFns = []
-render._withStripped = true
-module.exports = { render: render, staticRenderFns: staticRenderFns }
-if (false) {
-  module.hot.accept()
-  if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-e99d30b6", module.exports)
-  }
-}
-
-/***/ }),
+/* 206 */,
+/* 207 */,
+/* 208 */,
+/* 209 */,
+/* 210 */,
+/* 211 */,
+/* 212 */,
+/* 213 */,
+/* 214 */,
+/* 215 */,
 /* 216 */
 /***/ (function(module, exports) {
 

@@ -38,8 +38,8 @@ Vue.component(
 );
 
 Vue.component('landing-page', require('./components/LandingPage.vue'));
-Vue.component('bell-schedule', require('./components/BellSchedule.vue'));
-Vue.component('bell-sound', require('./components/BellSound.vue'));
+// Vue.component('bell-schedule', require('./components/BellSchedule.vue'));
+// Vue.component('bell-sound', require('./components/BellSound.vue'));
 
 const app = new Vue({
     el: '#app'

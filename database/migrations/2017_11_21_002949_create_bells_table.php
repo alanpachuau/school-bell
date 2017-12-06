@@ -17,11 +17,18 @@ class CreateBellsTable extends Migration
             $table->increments('id');
             $table->string('name')->nullable();
             $table->integer('sound1_id');
+            $table->integer('sound1_volume');
             $table->integer('sound2_id');
-            $table->string('day'); // monday, sunday, tuesday, ...
+            $table->integer('sound2_volume');
+            $table->boolean('monday')->default(false);
+            $table->boolean('tuesday')->default(false);
+            $table->boolean('wednesday')->default(false);
+            $table->boolean('thursday')->default(false);
+            $table->boolean('friday')->default(false);
+            $table->boolean('saturday')->default(false);
+            $table->boolean('sunday')->default(false);
             $table->string('time'); // 11:00, 23:59
-            $table->integer('switch_on_before'); // turn on active switches X minutes before sound play begins
-	        $table->integer('switch_off_after'); // turn off switches X minutes after sound play finish
+            $table->string('switch_on'); // turn on active switches X minutes before sound play begins
 	        $table->boolean('sw1')->default(false); // switch 1
 	        $table->boolean('sw2')->default(false); // switch 2
 	        $table->boolean('sw3')->default(false); // switch 3

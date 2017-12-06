@@ -18,3 +18,8 @@ Route::delete('/sounds/{id}', 'SoundController@remove');
 Auth::routes();
 
 Route::get('/', 'HomeController@index')->name('home');
+Route::get('/bells', 'BellController@index');
+Route::post('/bells', 'BellController@store');
+Route::get('/bells/{id}', 'BellController@show');
+Route::put('/bells/{id}', 'BellController@update');
+Route::delete('/bells/{id}', 'BellController@remove');

@@ -52,7 +52,6 @@
         },
         methods: {
             fetchSounds() {
-                let self = this
                 axios.get('/sounds', {
                 }).then(response => {
                     this.fileList = response.data
@@ -60,10 +59,12 @@
             },
             handleSuccess(response, file, fileList) {
                 this.fetchSounds()
+                this.$message('New sound added');
             },
             handleRemove(file, fileList) {
                 axios.delete('/sounds/' + file.id, {
                 }).then(response => {
+                    this.$message('Sound removed');
                 })
             },
             handlePreview(file) {
