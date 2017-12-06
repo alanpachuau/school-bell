@@ -68,7 +68,7 @@ class Kernel extends ConsoleKernel
                         $mpg321 = '/usr/bin/mpg321';
                         $cmd = $mpg321 . ' -g ' . $bell->sound1_volume . ' ' . storage_path('app/' . $bell->sound1_file);
 
-                        if($bell->sound2) {
+                        if($bell->sound2_id) {
                             $cmd .= ' && ' . $mpg321 . ' -g ' . $bell->sound2_volume . ' ' . storage_path('app/' . $bell->sound2_file);
                         }
 
