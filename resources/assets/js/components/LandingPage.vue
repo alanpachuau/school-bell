@@ -1,5 +1,5 @@
 <template>
-    <el-tabs v-model="activeName" :tab-position="tabPosition" @tab-click="handleTabClick" style="height: 80vh;">
+    <el-tabs v-model="activeName" :tab-position="tabPosition" @tab-click="handleTabClick" style="height: 90vh;overflow:auto;">
         <el-tab-pane name="first">
             <span slot="label">Bell <i class="el-icon-time"></i></span>
             <div style="margin-left: 50px;">
