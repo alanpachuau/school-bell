@@ -54,4 +54,34 @@ class BellController extends Controller
 
         $bell->save();
     }
+
+    public function update(Request $request, $id)
+    {
+        $bell = Bell::find($id);
+        $bell->name = $request->name;
+        $bell->time = $request->time;
+        $bell->sound1_volume = $request->sound1Volume;
+        $bell->sound2_volume = $request->sound2Volume;
+        $bell->sw1 = $request->switch1;
+        $bell->sw2 = $request->switch2;
+        $bell->sw3 = $request->switch3;
+        $bell->sw4 = $request->switch4;
+        $bell->switch_on = $request->switchOn;
+        $bell->sound1_id = $request->sound1;
+        $bell->sound2_id = $request->sound2;
+
+        $bell->sunday = false;
+        $bell->monday = false;
+        $bell->tuesday = false;
+        $bell->wednesday = false;
+        $bell->thursday = false;
+        $bell->friday = false;
+        $bell->saturday = false;
+
+        foreach($request->days as $day) {
+            $bell->{$day} = true;
+        }
+
+        $bell->save();
+    }
 }

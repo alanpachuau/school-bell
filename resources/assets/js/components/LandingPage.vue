@@ -19,6 +19,7 @@
                                         <el-tag size="mini" type="warning" v-if="bell.sound2_id"><i class="el-icon-time"></i> {{bell.sound2_volume}}%</el-tag>
                                     </el-col>
                                     <el-col :span="4" style="text-align:right;">
+                                        <el-button type="success" @click="editBell(bell)" size="mini" round icon="el-icon-edit"></el-button>
                                         <el-button type="danger" @click="removeBell(bell.id)" size="mini" round icon="el-icon-close"></el-button>
                                     </el-col>
                                 </el-row>
@@ -165,6 +166,108 @@
                         <el-button @click="save('newBell')" round>Save</el-button>
                     </span>
                 </el-dialog>
+
+                <el-dialog title="Edit Bell" width="80%" :visible.sync="editFormVisible">
+                    <el-form ref="editBell" :rules="rules" :model="editForm" label-width="120px" label-position="left">
+                        <el-row :gutter="60">
+                            <el-col :span="12">
+                                <el-form-item prop="name" label="Name">
+                                    <el-input v-model="editForm.name" placeholder="Enter name to identify this bell"
+                                              auto-complete="off"></el-input>
+                                </el-form-item>
+                                <el-form-item prop="days" label="Day">
+                                    <el-select style="width: 100%"
+                                               v-model="editForm.days"
+                                               clearable
+                                               multiple
+                                               placeholder="Choose day">
+                                        <el-option
+                                                v-for="item in days"
+                                                :key="item.id"
+                                                :label="item.name"
+                                                :value="item.id">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item prop="time" label="Time">
+                                    <el-time-picker
+                                            format="HH:mm"
+                                            value-format="HH:mm"
+                                            type="fixed-time"
+                                            placeholder="Pick a time"
+                                            v-model="editForm.time"
+                                            style="width: 100%;"></el-time-picker>
+                                </el-form-item>
+
+                                <el-form-item prop="sound1" label="Sound One">
+                                    <el-select style="width: 100%"
+                                               v-model="editForm.sound1"
+                                               clearable
+                                               placeholder="Choose sound one">
+                                        <el-option
+                                                v-for="item in sounds"
+                                                :key="item.id"
+                                                :label="item.name"
+                                                :value="item.id">
+                                        </el-option>
+                                    </el-select>
+                                    <div class="block">
+                                        <span class="demonstration">Sound Volume</span>
+                                        <el-slider style="float: right; width: 70%; line-height: 34px;"
+                                                   v-model="editForm.sound1Volume">
+                                        </el-slider>
+                                    </div>
+                                </el-form-item>
+                                <el-form-item prop="sound2" label="Sound Two">
+                                    <el-select style="width: 100%"
+                                               v-model="editForm.sound2"
+                                               clearable
+                                               placeholder="Choose sound two">
+                                        <el-option
+                                                v-for="item in sounds"
+                                                :key="item.id"
+                                                :label="item.name"
+                                                :value="item.id">
+                                        </el-option>
+                                    </el-select>
+                                    <div class="block">
+                                        <span class="demonstration">Sound Volume</span>
+                                        <el-slider style="float: right; width: 70%; line-height: 34px;"
+                                                   v-model="editForm.sound2Volume">
+                                        </el-slider>
+                                    </div>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item prop="switches" label="Switches">
+                                    <el-switch style="margin-right: 10px;" v-model="editForm.switch1"
+                                               active-text="SW1"></el-switch>
+                                    <el-switch style="margin-right: 10px;" v-model="editForm.switch2"
+                                               active-text="SW2"></el-switch>
+                                    <el-switch style="margin-right: 10px;" v-model="editForm.switch3"
+                                               active-text="SW3"></el-switch>
+                                    <el-switch style="margin-right: 10px;" v-model="editForm.switch4"
+                                               active-text="SW4"></el-switch>
+                                    <div class="sub-title">Only active switches will be controlled</div>
+                                </el-form-item>
+                                <el-form-item prop="switchOn" label="Switch On At">
+                                    <el-time-picker
+                                            format="HH:mm"
+                                            value-format="HH:mm"
+                                            type="fixed-time"
+                                            placeholder="Pick a time"
+                                            v-model="editForm.switchOn"
+                                            style="width: 100%;"></el-time-picker>
+                                    <div class="sub-title">Switches will be turned off automatically</div>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                    <span slot="footer" class="dialog-footer">
+                        <el-button @click="editFormVisible = false" round>Close</el-button>
+                        <el-button @click="updateBell(editForm)" round>Save</el-button>
+                    </span>
+                </el-dialog>
             </div>
         </el-tab-pane>
         <el-tab-pane name="second">
@@ -234,7 +337,9 @@
                     sound1: [
                         {required: true, message: 'Please choose bell sound', trigger: 'change'}
                     ]
-                }
+                },
+                editFormVisible: false,
+                editForm: {},
             };
         },
         created: function () {
@@ -326,7 +431,72 @@
                     this.$message('Bell removed');
                     this.fetchBells()
                 })
-            }
+            },
+            editBell(bell) {
+              let days = [];
+              if(bell.sunday == 1) {
+                days.push('sunday');
+              }
+              if(bell.monday == 1) {
+                days.push('monday');
+              }
+              if(bell.tuesday == 1) {
+                days.push('tuesday');
+              }
+              if(bell.wednesday == 1) {
+                days.push('wednesday');
+              }
+              if(bell.thursday == 1) {
+                days.push('thursday');
+              }
+              if(bell.friday == 1) {
+                days.push('friday');
+              }
+              if(bell.saturday == 1) {
+                days.push('saturday');
+              }
+
+                this.editForm = {
+                    id: bell.id,
+                    name: bell.name,
+                    sound1: bell.sound1_id,
+                    sound2: bell.sound2_id,
+                    days: days,
+                    time: bell.time,
+                    sound1Volume: bell.sound1_volume,
+                    sound2Volume: bell.sound2_volume,
+                    switch1: bell.sw1 == 1,
+                    switch2: bell.sw2 == 1,
+                    switch3: bell.sw3 == 1,
+                    switch4: bell.sw4 == 1,
+                    switchOn: bell.switch_on,
+                }
+
+                this.editFormVisible = true;
+            },
+            updateBell(bell) {
+                this.$refs['editBell'].validate((valid) => {
+                    if (valid) {
+                        axios.put('/bells/' + bell.id, this.editForm)
+                            .then(response => {
+                                this.$message('Bell updated!');
+                                this.editFormVisible = false
+                                this.$refs['editBell'].resetFields();
+                                this.initFormData()
+                                this.fetchBells()
+                            })
+                            .catch(error => {
+                                if (error && typeof error.response.data === "object") {
+                                    console.log(_.flatten(_.toArray(error.response.data)))
+                                } else {
+                                    console.log(['Something went wrong. Please try again.'])
+                                }
+                            });
+                    } else {
+                        return false;
+                    }
+                });
+            },
         }
     };
 </script>
