@@ -18,8 +18,8 @@ class CreateBellsTable extends Migration
             $table->string('name')->nullable();
             $table->integer('sound1_id')->default(0);
             $table->integer('sound1_volume')->default(90);
-            $table->integer('sound2_id')->default(0);
-            $table->integer('sound2_volume')->default(90);
+            $table->integer('sound2_id')->nullable()->default(0);
+            $table->integer('sound2_volume')->nullable()->default(90);
             $table->boolean('monday')->default(false);
             $table->boolean('tuesday')->default(false);
             $table->boolean('wednesday')->default(false);
