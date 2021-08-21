@@ -29,10 +29,10 @@ class CreateBellsTable extends Migration
             $table->boolean('sunday')->default(false);
             $table->string('time'); // 11:00, 23:59
             $table->string('switch_on'); // turn on active switches X minutes before sound play begins
-	        $table->boolean('sw1')->default(false); // switch 1
-	        $table->boolean('sw2')->default(false); // switch 2
-	        $table->boolean('sw3')->default(false); // switch 3
-	        $table->boolean('sw4')->default(false); // switch 4
+	          $table->boolean('sw1')->default(false); // switch 1
+	          $table->boolean('sw2')->default(false); // switch 2
+	          $table->boolean('sw3')->default(false); // switch 3
+            $table->boolean('sw4')->default(false); // switch 4
             $table->timestamps();
         });
     }
