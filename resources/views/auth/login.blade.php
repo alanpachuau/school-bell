@@ -13,10 +13,12 @@
             <el-form method="POST" action="{{ route('login') }}" label-width="120px" :inline=true>
                 {{ csrf_field() }}
                 <el-form-item label="">
-                    <el-input name="username" placeholder="Username"></el-input>
+                    <input type="text" autocomplete="off" name="username" placeholder="Username" class="el-input__inner">
+                    <!-- <el-input name="username" placeholder="Username"></el-input> -->
                 </el-form-item>
                 <el-form-item label="">
-                    <el-input type="password" name="password" placeholder="Password"></el-input>
+                    <input type="password" autocomplete="off" name="password" placeholder="Password" class="el-input__inner">
+                    <!-- <el-input type="password" name="password" placeholder="Password"></el-input> -->
                 </el-form-item>
                 <el-button native-type="submit" size="huge" round><i class="el-icon-arrow-right"></i> Login</el-button>
             </el-form>
